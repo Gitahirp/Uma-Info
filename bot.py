@@ -7,13 +7,13 @@ TWITTER_USER = "uma_musu_jp"
 WEBHOOK_URL = os.getenv("DISCORD_WEBHOOK")
 DB_FILE = "last_tweet.txt"
 
-# 1. Initialize with a higher log level to see what's happening
-# 2. We use a known stable instance instead of letting it guess
-scraper = Nitter(log_level=1)
+# 1. Initialize with log_level=1 to see what's happening
+# 2. Skip the automatic check to prevent the IndexError crash
+scraper = Nitter(log_level=1, skip_instance_check=True)
 
 try:
-    # We try to get tweets. If one instance fails, you can try another.
-    # common instances: 'nitter.net', 'nitter.poast.org', 'nitter.privacydev.net'
+    # We try a known stable instance. 
+    # If poast.org fails, try 'https://nitter.privacydev.net' or 'https://xcancel.com'
     tweets = scraper.get_tweets(TWITTER_USER, mode='user', number=1, instance='https://nitter.poast.org')
     
     if tweets and 'tweets' in tweets and len(tweets['tweets']) > 0:
@@ -34,7 +34,7 @@ try:
                 "title": f"New Post from @{TWITTER_USER}",
                 "description": tweet_text,
                 "url": tweet_link,
-                "color": 16711935, # Pink color for Umamusume
+                "color": 16711935, # Pink color
                 "footer": {"text": "Sent via GitHub Actions"}
             }]
         }
@@ -46,6 +46,8 @@ try:
                 f.write(tweet_link)
         else:
             print(f"Discord Error: {response.status_code}")
+    else:
+        print("No tweets found or account is private/empty.")
 
 except Exception as e:
     print(f"Scraper failed: {e}")
