@@ -33,6 +33,11 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-          git add last_tweet_id.txt
-          git commit -m "Update last tweet ID" || exit 0
-          git push
+          # This check prevents the 'pathspec' error if the file is missing
+          if [ -f last_tweet_id.txt ]; then
+            git add last_tweet_id.txt
+            git commit -m "Update last tweet ID" || echo "No changes to commit"
+            git push
+          else
+            echo "File last_tweet_id.txt not found, skipping commit."
+          fi
